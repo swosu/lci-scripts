@@ -17,7 +17,7 @@ scp /root/.ssh/authorized_keys lci-compute-XX-1:/root/.ssh
 scp /root/.ssh/authorized_keys lci-compute-XX-2:/root/.ssh
 scp /root/.ssh/authorized_keys lci-storage-XX-1:/root/.ssh
 
-## Parallel Shell
+## Parallel Shell (first thing that actually needed to be done)
 dnf install clustershell
 
 # Add the following to the /etc/clustershell/groups.d/local.cfg file (replace the example stuff)
