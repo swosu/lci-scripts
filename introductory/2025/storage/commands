@@ -1,4 +1,4 @@
-Storage Lab Commands -- LCI Intro 2023:
+Storage Lab Commands -- LCI Intro 2025:
 
 ##Commands section
 lsscsi
@@ -17,28 +17,33 @@ namei -l /usr/share/misc/magic
 ## mdadm
 dnf -y install mdadm
 mdadm --zero-superblock --force /dev/$dev_regex
-mdadm --create --verbose /dev/md0 --level=6 --raid-devices=4 /dev/$dev_regex
+mdadm --create /dev/md1 --level=6 --raid-devices=4 /dev/vdb /dev/vdc /dev/vdd /dev/vde
 lsblk
 cat /proc/mdstat
-mdadm -D /dev/md0
-mkfs.ext4 /dev/md0
-mkdir /scratch && mount /dev/md0 /scratch
+mdadm -D /dev/md1
+mkfs.ext4 /dev/md1
+mkdir /scratch && mount /dev/md1 /scratch
 
 
 ## ZFS
+umount /scratch
+mdadm --stop /dev/md1
 dnf -y install https://zfsonlinux.org/epel/zfs-release-2-3$(rpm --eval "%{dist}").noarch.rpm
 dnf install -y epel-release kernel-devel
 dnf install -y zfs
 /sbin/modprobe zfs
 zpool status
-zpool create scratch raidz2 $dev1 $dev2 $dev3 $dev4
+zpool create scratch raidz2 $dev1 $dev2 $dev3 $dev4 -f
 zpool status
 df -h
 zfs get all scratch
 
 ## NFS
 dnf -y install nfs-utils
+
+# Add following line to /etc/exports
 /scratch 192.168.0.5(rw,sync,no_root_squash)
+
 systemctl start nfs-server && exportfs -ra
 mkdir -p /scratch
 192.168.0.4:/scratch	/scratch   nfs defaults 0 0

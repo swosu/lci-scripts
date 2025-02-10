@@ -17,7 +17,8 @@ scp /root/.ssh/authorized_keys lci-compute-XX-1:/root/.ssh
 scp /root/.ssh/authorized_keys lci-compute-XX-2:/root/.ssh
 scp /root/.ssh/authorized_keys lci-storage-XX-1:/root/.ssh
 
-## Parallel Shell (first thing that actually needed to be done)
+## Parallel Shell
+# On your head node for this section
 dnf install clustershell
 
 # Add the following to the /etc/clustershell/groups.d/local.cfg file (replace the example stuff)
@@ -30,7 +31,7 @@ storage: lci-storage-XX-1
 clush -g compute "uptime"
 
 ## Time Sync
-dnf install chronyd
+dnf install chrony
 #confirm config file meets expectation
 systemctl start chronyd && systemctl enable chronyd
 
@@ -41,10 +42,11 @@ useradd -u 2003 katie
 ## Central Logging
 
 # Remove comments for following lines in /etc/rsyslog.conf on lci-head-XX-1
-$ModLoad imudp.so
-$UDPServerRun 514
-$ModLoad imtcp.so
-$InputTCPServerRun 514
+module(load="imudp") # needs to be done just once
+input(type="imudp" port="514")
+
+module(load="imtcp") # needs to be done just once
+input(type="imtcp" port="514")
 
 # Add these two lines in the Modules section:
 $template DynamicFile,"/var/log/%HOSTNAME%/forwarded-logs.log"
@@ -53,7 +55,7 @@ $template DynamicFile,"/var/log/%HOSTNAME%/forwarded-logs.log"
 # Restart rsyslog on head node
 systemctl restart rsyslog
 
-# Add following to the very bottom of /etc/rsyslog on both compute nodes/storage node and restart rsyslog service on those nodes
+# Add following to the very bottom of /etc/rsyslog.conf on both compute nodes/storage node and restart rsyslog service on those nodes
 *.* @lci-head-XX-1
 systemctl restart rsyslog
 
